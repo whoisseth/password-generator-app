@@ -1,113 +1,290 @@
+/** @format */
+"use client";
+
+import clsx from "clsx";
 import Image from "next/image";
+import { FaRegCopy } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa6";
+import { passwordStrength } from "check-password-strength";
+import { Slider } from "@radix-ui/react-slider";
+import SliderCompnent from "./components/Slider";
+import { useState } from "react";
+// var generator = require('generate-password');
+import generator from "generate-password";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
+  const [isCopied, setCopied] = useState(false);
+  const [length, setLength] = useState(10);
+  const [numbers, setNumbers] = useState(false);
+  const [uppercase, setUppercase] = useState(false);
+  const [lowercase, setLowercase] = useState(true);
+  const [symbols, setSymbols] = useState(false);
+  const [generatedPasswowrd, setGeneratedPasswowrd] = useState("");
+
+  //
+  // const password = generator.generate({
+  //   length: length,
+  //   numbers: numbers,
+  //   uppercase: uppercase,
+  //   lowercase: lowercase,
+  //   symbols: symbols
+  // });
+
+  const password =
+    !numbers && !uppercase && !lowercase && !symbols
+      ? "0"
+      : generator.generate({
+          length: length,
+          numbers: numbers,
+          uppercase: uppercase,
+          lowercase: lowercase,
+          symbols: symbols
+        });
+  console.log("passwordStrength", passwordStrength(password).value);
+
+  const handleSilderChange = (newValue: number[]) => {
+    setLength(newValue[0]);
+  };
+
+  function handleCopy() {
+    navigator.clipboard.writeText(password);
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  }
+
+  function handlePassword() {
+    if (!numbers && !uppercase && !lowercase && !symbols) {
+      alert("At least one rule for pools must be true");
+    } else setGeneratedPasswowrd(password);
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
+    <div className="bg-stone-900 min-h-screen w-full p-5 text-white flex items-center justify-center">
+      <main className="w-full  max-w-[500px] flex flex-col gap-6  ">
+        <p className="font-bold text-2xl text-gray-500 text-center">
+          Password Generator
         </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+        <div className="flex flex-col gap-7">
+          {/* output  container */}
+          <div className=" bg-zinc-700 flex justify-between items-center  gap-5 p-4">
+            <p className="font-bold text-3xl text-white overflow-x-auto pr-2 ">
+              {generatedPasswowrd}
+            </p>
+            <div className="flex items-center gap-3">
+              {isCopied && <div className="font-bold text-Green">COPIED</div>}
+              <FaRegCopy
+                onClick={handleCopy}
+                className={cn(
+                  "text-2xl min-h-8 min-w-8 hover:text-Green text-white cursor-pointer",
+                  { "text-Green": isCopied }
+                )}
+              />
+            </div>
+          </div>
+          {/* section */}
+          <section className="bg-zinc-700 py-6 px-8 flex gap-4 flex-col">
+            {/* Character Length */}
+            <div className="flex justify-between items-center font-bold">
+              <p className=" text-lg">Character Length</p>
+              <p className="text-3xl text-Green">{length} </p>
+            </div>
+            <SliderCompnent
+              onValueChange={handleSilderChange}
+              defaultValue={[length]}
+              value={[length]}
             />
-          </a>
+
+            {/*  */}
+            {/* PasswordType section */}
+            <div className="flex flex-col gap-3">
+              <PasswordType
+                onClick={() => setUppercase(!uppercase)}
+                isChecked={uppercase}
+                text="Include Uppercase Letters"
+              />
+
+              <PasswordType
+                onClick={() => setLowercase(!lowercase)}
+                isChecked={lowercase}
+                text="Include Lowercase Letters"
+              />
+              <PasswordType
+                onClick={() => setNumbers(!numbers)}
+                isChecked={numbers}
+                text="Include Numbers"
+              />
+              <PasswordType
+                onClick={() => setSymbols(!symbols)}
+                isChecked={symbols}
+                text="Include Symbols"
+              />
+            </div>
+
+            {/*  STRENGTH*/}
+            <div className=" items-center bg-stone-900 h-16 flex gap-3 justify-between px-8 font-bold">
+              <p className="text-gray-500">STRENGTH</p>
+              {/* right div */}
+              <div className="flex gap-3">
+                <p className=" text-lg">
+                  {passwordStrength(generatedPasswowrd).value}
+                </p>
+
+                <div className="flex gap-1 ">
+                  <PasswordStrength
+                    type={passwordStrength(generatedPasswowrd).value}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* button */}
+            <button
+              onClick={handlePassword}
+              className="w-full h-16 bg-Green text-stone-900 text-lg items-center justify-center font-bold flex gap-2 hover:bg-zinc-700 border-2 border-Green hover:text-Green transition-all"
+            >
+              <span>GENERATE</span>
+
+              <FaArrowRight />
+            </button>
+          </section>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
+// MEDIUM
+function PasswordStrength({
+  type
+}: {
+  type: "Too weak" | "Weak" | "Medium" | "Strong" | string;
+}) {
+  const stylist = [
+    {
+      color: "bg-red-500",
+      type: "Too weak"
+    },
+    {
+      color: "bg-orange-700",
+      type: "Weak"
+    },
+    {
+      color: "bg-green-500",
+      type: "Medium"
+    },
+    {
+      color: "bg-orange-400",
+      type: "Strong"
+    }
+  ];
+
+  let color;
+
+  if (type === "Too weak")
+    return (
+      <>
+        {stylist.map((d, i) => (
+          <div
+            className={clsx(
+              "h-7 w-[10px] border border-white",
+              i == 0 && "bg-red-500"
+            )}
+          />
+        ))}
+      </>
+    );
+  else if (type === "Weak")
+    return (
+      <>
+        {stylist.map((d, i) => (
+          <div
+            className={clsx(
+              "h-7 w-[10px] border border-white",
+              i <= 1 && "bg-orange-700"
+            )}
+          />
+        ))}
+      </>
+    );
+  else if (type === "Medium")
+    return (
+      <>
+        {stylist.map((d, i) => (
+          <div
+            className={clsx(
+              "h-7 w-[10px] border border-white",
+              i <= 2 && "bg-orange-400"
+            )}
+          />
+        ))}
+      </>
+    );
+  else if (type === "Strong")
+    return (
+      <>
+        {stylist.map((d, i) => (
+          <div
+            className={clsx(
+              "h-7 w-[10px] border border-white",
+              i <= stylist.length - 1 && "bg-green-500"
+            )}
+          />
+        ))}
+      </>
+    );
+}
+
+function PasswordType({
+  text,
+  isChecked = true,
+  onClick
+}: {
+  isChecked: boolean;
+  text: string;
+  onClick: React.MouseEventHandler<HTMLButtonElement> | undefined;
+}) {
+  return (
+    <div className="flex gap-5 font-bold">
+      {/* checkbox */}
+      <button
+        onClick={onClick}
+        className={clsx(
+          "border-2  flex items-center justify-center  p-1 cursor-pointer  h-6 w-6",
+          {
+            "bg-Green border-transparent": isChecked,
+            "border-white hover:border-Green ": !isChecked
+          }
+        )}
+      >
+        {isChecked && <FaCheck className="text-xs text-zinc-700" />}
+      </button>
+
+      <p>{text}</p>
+    </div>
+  );
+}
+
+// return (
+//   <>
+//     <div
+//       className={clsx("h-7 w-[10px] border border-white", {
+//         "bg-red-500": type === "Too weak",
+//         "bg-orange-700": type === "Weak",
+//         "bg-orange-400": type === "Medium",
+//         "bg-green-500": type === "Strong"
+//       })}
+//     />
+//     <div
+//       className={clsx("h-7 w-[10px] border border-white", {
+//         "bg-red-500": type === "Too weak",
+//         "bg-orange-700": type === "Weak",
+//         "bg-orange-400": type === "Medium",
+//         "bg-green-500": type === "Strong"
+//       })}
+//     />
+//   </>
+// );
