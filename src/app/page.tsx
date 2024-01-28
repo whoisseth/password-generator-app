@@ -189,6 +189,7 @@ function PasswordStrength({
       <>
         {stylist.map((d, i) => (
           <div
+            key={i}
             className={clsx(
               "h-7 w-[10px] border border-white",
               i == 0 && "bg-red-500"
@@ -202,6 +203,7 @@ function PasswordStrength({
       <>
         {stylist.map((d, i) => (
           <div
+            key={i}
             className={clsx(
               "h-7 w-[10px] border border-white",
               i <= 1 && "bg-orange-700"
@@ -215,6 +217,7 @@ function PasswordStrength({
       <>
         {stylist.map((d, i) => (
           <div
+            key={i}
             className={clsx(
               "h-7 w-[10px] border border-white",
               i <= 2 && "bg-orange-400"
@@ -228,6 +231,7 @@ function PasswordStrength({
       <>
         {stylist.map((d, i) => (
           <div
+            key={i}
             className={clsx(
               "h-7 w-[10px] border border-white",
               i <= stylist.length - 1 && "bg-green-500"
